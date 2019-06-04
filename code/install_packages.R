@@ -4,15 +4,15 @@
 #'   
 
 #'## It is important that you have already updated R
-#'you should be running version 3.6.0
+#'you should be running version 4.0.0
 R.version$version.string   
 #' this is because many packages update and change to fix bugs and add new features.
 #' Local library   
-.libPaths("C:/EBC4/Rpackages")
+.libPaths("C:/EBC5/Rpackages")
 
 #' Please consider updating your packages
 #' this step requires agreeing for each update (y for yes)
-update.packages(lib.loc="C:/EBC4/Rpackages")
+update.packages(lib.loc="C:/EBC5/Rpackages")
 
 #'# Installation of new packages   
 #' vector of packages we will need if not yet installed:
@@ -26,13 +26,13 @@ methpackagesBioC <- c("minfi", "FlowSorted.Blood.450k", "missMethyl", "ENmix","I
 #' install these from CRAN:
 toinstallCRAN <- setdiff(methpackagesCRAN, installed.packages()[,1])
 if(length(toinstallCRAN >= 1)) {
-  install.packages(toinstallCRAN,dependencies=TRUE, lib="C:/EBC4/Rpackages")
+  install.packages(toinstallCRAN,dependencies=TRUE, lib="C:/EBC5/Rpackages")
   cat("finished installing new packages from CRAN\n")
 } else cat("packages we need from CRAN are already installed\n")
 #' install these from BioConductor:
 toinstallBioC <- setdiff(methpackagesBioC, installed.packages()[,1])
 if(length(toinstallBioC >= 1)) {
-  BiocManager::install(toinstallBioC, update = TRUE ,lib.loc="C:/EBC4/Rpackages")
+  BiocManager::install(toinstallBioC, update = TRUE ,lib.loc="C:/EBC5/Rpackages")
   cat("finished installing new packages from BioConductor\n")
 } else cat("packages we need from BioConductor are already installed\n")
 
