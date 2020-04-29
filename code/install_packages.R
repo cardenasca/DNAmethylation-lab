@@ -21,7 +21,7 @@ methpackagesCRAN <- c("Rcpp","openssl","CpGassoc", "rmarkdown", "knitr", "matrix
                       "pryr", "data.table", "qqman", "RPMM", "MASS", "sandwich", "lmtest","foreach", "stringi","doParallel","magrittr","purrr")
 methpackagesBioC <- c("minfi", "FlowSorted.Blood.450k", "missMethyl", "ENmix","IlluminaHumanMethylation450kanno.ilmn12.hg19",
                       "IlluminaHumanMethylation450kmanifest", "IlluminaHumanMethylationEPICmanifest",
-                      "sva", "IlluminaHumanMethylationEPICanno.ilm10b2.hg19", 
+                      "sva", "IlluminaHumanMethylationEPICanno.ilm10b2.hg19","illuminaio", 
                       "DMRcate", "shinyMethyl","bumphunter","wateRmelon","FDb.InfiniumMethylation.hg19")
 #' install these from CRAN:
 toinstallCRAN <- setdiff(methpackagesCRAN, installed.packages()[,1])
@@ -55,3 +55,5 @@ if(!as.numeric(sub("\\.[0-9]$", "", installed.packages()["minfi","Version"])) >=
 #' cleanup
 rm(methpackagesCRAN, methpackagesBioC, toinstallCRAN, toinstallBioC)
 #' End of script
+#' 
+#' 
