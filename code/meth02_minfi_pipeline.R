@@ -1,5 +1,5 @@
 #'# minfi-ewastools pipeline comparison
-.libPaths("C:/EBC4/Rpackages")
+.libPaths("C:/EBC5/Rpackages")
 #+ setdir01, echo = F
 knitr::opts_knit$set(root.dir = "../")
 
@@ -9,7 +9,7 @@ library(magrittr)
 options(warn=0)
 
 #' List of idat files
-pheno = fread("C:/EBC4/methylation-lab/data/pheno_clean.csv")
+pheno = fread("C:/methylation-lab/DNAmethylation-lab/data/pheno_clean.csv")
 
 #' ## Pre-processing with `ewastools`
 
