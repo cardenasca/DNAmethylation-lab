@@ -1,6 +1,6 @@
 #'# Example of using a GEO dataset (450k)
 
-.libPaths("C:/EBC4/Rpackages")
+.libPaths("C:/EBC5/Rpackages")
 
 options(warn=-1)
 library(utils)

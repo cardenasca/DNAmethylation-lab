@@ -4,7 +4,7 @@
 #+ setdir03, echo = F
 knitr::opts_knit$set(root.dir = "../")
 #' Local library
-.libPaths("C:/EBC4/Rpackages")
+.libPaths("C:/EBC5/Rpackages")
 
 options(warn=-1)
 suppressMessages(library(data.table))
@@ -53,7 +53,8 @@ myannotation <- cpg.annotate("array", na.omit(betas.clean), analysis.type="diffe
 dmrcoutput.smoking <- dmrcate(myannotation, lambda=1000, C=2)
 
 #'Let's look at the results
-head(dmrcoutput.smoking$results)
+results.ranges <- extractRanges(dmrcoutput.smoking, genome = "hg19")
+results.ranges
 
 #'Visualizing the data can help us understand where the region lies 
 #'relative to promoters, CpGs islands or enhancers
