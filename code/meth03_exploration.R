@@ -10,7 +10,7 @@ suppressMessages(library(ENmix))
 options(warn=0)
 
 #' Load the data
-load("C:/EBC5/methylation-lab/data/processed.rda")
+load("C:/EBC5/DNAmethylation-lab/data/processed.rda")
 
 #'# Exploring global DNA Methylation variability via PCs
 # Let's look at the effect of sex
@@ -39,7 +39,7 @@ prop <- (sum(eigenvalue[1:npc])/sum(eigenvalue)) * 100
 cat("Top ", npc, " principal components can explain ", 
     prop, "% of data \n    variation", "\n")
 screeplot(svd,npc,type="barplot")
-#pcrplot(na.omit(betas.clean), cov, npc=10) # Already saved in C:\EBC4\methylation-lab
+#pcrplot(na.omit(betas.clean), cov, npc=10) # Already saved in C:\EBC5\DNAmethylation-lab
 
 
 #'# Epigenetic Age
