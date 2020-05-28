@@ -1,161 +1,235 @@
-#' ---
-#' title: "Processing, analyzing, and interpreting epigenome-wide DNA methylation data"
-#' author: "Andrea Baccarelli, Andres Cardena, Elena Colicino, Jonathan Heiss, Allan Just"
-#' date: "June, 2019"
-#' geometry: margin=2cm
-#' number_sections: true
-#' ---
-#' Local library
+# point R to the path of the installed packages
 .libPaths("C:/EBC5/Rpackages")
-#+ setdir01, echo = F
-knitr::opts_knit$set(root.dir = "../")
 
-
-options(warn=-1)
+# load required libraries (ignore warning messages)
 library(stringi)
 library(magrittr)
 library(data.table)
 library(svd)
 library(ewastools)
-options(warn=0)
 
 
-#' ## Importing the data
-#' 1. Read in the file `data/pheno.csv` using `fread` from the data.table package, save it as object named `pheno`.
-#' 2. Import the methylation data using the function `read_idats`.
-#'    You only have to provide the first part of the file name without the `_Red.idat.gz` or `_Grn.idat.gz` suffixes.
-#' 3.  Save as object named `meth`
-
+## Importing the data
+# Metadata stored in `data/pheno.csv` is imported using `fread` from the
+# data.table package and stored in the object `pheno`
 pheno = fread("data/pheno.csv")
-meth = read_idats("data/" %s+% pheno$gsm,quiet=TRUE)
+
+# Take a look at the metadata
+pheno
+
+# Column `gsm` is the sample ID (GEO acession) as well as the first part of the
+# file name. For each sample there are two files, `$$$_Red.idat.gz` and
+# `$$$_Grn.idat.gz`, containing fluorescence intensities in the red and green
+# color channel, respectively. Import the data using `read_idats`. Provide only
+# the `$$$` part of the file name. Store in object `meth`.
+meth = read_idats("data/" %s+% pheno$gsm)
 
 
-#' Take a look at the dataset
+# `meth` is a list. Take a look at the some of the list elements
+names(meth)
 
-# The name of the platform (450K/EPIC)
+# Which platform was used.
 meth$platform
 
-#' A manifest with probe IDs, color channel, genomic coordinates and other important information
-meth$manifest[4000:4010]
-#' Please note that Type I probes have `addressU` and `addressM` (two different beads), whereas Type II probes only have a single `addressU`
+# `manifest` is a data.table with information about all the probes on the chip
+meth$manifest[4001:4010]
 
-#' Most of the probes are of Type II
-table(meth$manifest$channel)
+# For example, `probe_id` is a unique identifier for each probe. The combination
+# of `chr` and `mapinfo` gives the genomic coordinates of the targeted loci.
+# The column `probe_type` refers to the type of loci that are targeted by these
+# probes. Here, all the probes are CpG sites, i.e., "cg".
 
-#' Not all probes are targeting CpG sites
-table(meth$manifest$probe_type)
+# QUESTION: What other type of loci besides CpG sites are there?
 
-#' Similar manifest for the control probes
-head(meth$controls)
+# The column `channel` tells us the color channel and Infinium probe design type.
+# "Grn" and "Red" imply Infinium Type I, "Both" implies Type II.
 
-#' Also included
-# Matrices contained fluorescence intensities for the methylated (`M`) and unmethylated (`U`) signals
+# `addressU` and `addressM` are the unique identifier of the beads (a bead is not
+# is not the same as a probe).
+
+
+# QUESTION: Why is the column `addressM` missing for entries with
+# `probe_type=="Both"`?
+
+# Some columns (`index`,`OOBi`,`Ui`,`Mi`) are used for the internal workings of
+# the `ewastools` package and not of interest for the user
+
+
+# Fluorescence intensities observed at the bead locations are stores in
+# `M` (methylated) and `U` (unmethylated) (`U`).
 dim(meth$M)
+# The matrix has 485,577 rows, one for each probe, and 35 columns, one for each
+# sample
+
+# Let's look at these fluorescence intensities three probes in three samples.
 meth$U[201:203,1:3]
 meth$M[201:203,1:3]
 
-#' Matrices with the bead copy number (`N` and `V`)
+# QUESTION: Comparing corresponding entries across `U` and `M` above, what can
+# you infer about these loci?
+
+# Because of the random assembly of the chips, the copy number can vary for each
+# bead, and the values in `U` and `M` actually are averages. Copy numbers are
+# stored in `V` (corresponding to `U`) and `N` (corresponding to `M`)
 dim(meth$N)
 meth$N[201:203,1:3]
 
-#' For some beads the copy number is zero. Because of the random assembly some did not end up on the chips
-colSums(meth$N==0)
+# For some beads the copy number can be zero.
+# QUESTION: How many probes are missing in the first sample?
 
-#' Matrices with the out-of-band intensities
-dim(meth$oobG$M) # same number as Type I red probes
-dim(meth$oobR$U)
+# The `meth` list includes some for elements, among them matrices and a manifest
+# for control probes. The control probes don't target CpG sites, but are used to
+# monitor the various experimental steps or for preprocessing. We will make use
+# of them below for quality control.
 
-#' Some meta data
-head(meth$meta)
 
-#' # Quality control
 
-#' ## Control metrics
-#' The first quality check evaluates 17 control metrics which are describe in the [BeadArray Controls Reporter Software Guide](https://support.illumina.com/content/dam/illumina-support/documents/documentation/chemistry_documentation/infinium_assays/infinium_hd_methylation/beadarray-controls-reporter-user-guide-1000000004009-00.pdf) from Illumina. Exemplary, the "Bisulfite Conversion II" metric is plotted below. Three samples fall below the Illumina-recommended cut-off of 1. Input for `control_metrics()` is the output of `read_idats()`, e.g. the object holding raw or dye-bias-corrected intensities.
 
-#' 1. Use the functions `control_metrics` and `sample_failure`
-#' 2. Are there any failed samples?
 
-meth %>% control_metrics %>% sample_failure -> pheno$failed
-# Alternative syntax:
-# pheno$failed = sample_failure(control_metrics(meth))
 
-table(pheno$failed,useNA='ifany')
-#' There are no failed samples.
-#'
 
-#' ## Sex check
-#'
-#' 1. Apply the function `check_sex` on the `meth` object to compute the normalized average total fluorescence intensity of probes targeting the X and Y chromosomes.
-#' 2. Use the function `predict_sex` to infer the sex of the sample donors from the methylation data.
-#' 3. Add column `predicted_sex` to `pheno`
-#' 4. Are there samples where `sex != predicted_sex`? What is the sample ID?
-#' 5. Flag the problematic samples with a logical variable `exclude` in `pheno`
 
-pheno[,c("X","Y"):=check_sex(meth)]
+# ------------------------------------------------------------------------------
+# Quality control
 
-pheno$predicted_sex = predict_sex(pheno$X,pheno$Y,which(pheno$sex=="m"),which(pheno$sex=="f"))
-
-pheno[sex!=predicted_sex]
-plot(Y~X,data=pheno,type="n")
-text(Y~X,labels=sex,col=ifelse(sex=="m",2,1),data=pheno)
-
+# Create a flag for samples that we want to exclude from the final dataset
 pheno[,exclude:=FALSE]
 
-pheno[sex!=predicted_sex,.(gsm,sex,predicted_sex)]
-pheno[sex!=predicted_sex,exclude:=TRUE] # flag sample
+# Control metrics
+# The first quality check evaluates 17 control metrics which are describe in the
+# BeadArray Controls Reporter Software Guide from Illumina.
 
-#' ## Detection p-values
-#' 
+# `control_metrics()` calculates the control metrics from the control probes
+# `sample_failure()` evaluates control metrics against thresholds
 
+meth %>% control_metrics %>% sample_failure -> pheno$failed
+# Here we are making use of the pipe operator (%>%) from the `magrittr` package.
+# The line above is equivalent to (i.e., could be alternatively written as)
+# pheno$failed = sample_failure(control_metrics(meth))
+
+# QUESTION: Are there any failed samples?
+
+
+# ------------------------
+# Detection p-values
+
+# `detectionP()` calculates detecton p-values and stores them as in a new list
+# element `detP`. Detection p-values should be based on raw data, i.e., before
+# preprocessing such as dye-bias correction. We will use `mask()` later to drop
+# those observations with p-values above a specified cut-off
 meth = ewastools::detectionP(meth)
+
+# Comparison of detection p-values for probes targeting the Y chromosome across
+# males and females
+# Get the indices of the probes
 chrY = meth$manifest[chr=='Y',index]
+# There are 416 such probes
+length(chrY)
+# Retrieve the corresponding p-values
 detP = meth$detP[chrY,]
+# Count those below 0.01 as detected
 detP = colSums(detP<0.01,na.rm=TRUE)
 
 boxplot(split(detP,pheno$predicted_sex),ylab="# of detected Y chromosome probes")
 split(detP,pheno$predicted_sex) %>% sapply(mean)
 
-#' Almost all of the 416 chromosome probes are called detected in male samples, for female samples on average 60 are called detected.
+# Almost all of the 416 chromosome probes are called detected in the males whereas
+# among females 60 probes are detected on average.
 
-#' How many probes are undetected (not counting the Y chromosome). The cut-off used here is 0.01
-meth$detP[-chrY,] %>% is_weakly_greater_than(0.01) %>% table(useNA="ifany")
-
-#' Less than 0.2% are undetected
-round((33749/(33749+16939303))*100,3)
-
-#' We should mask these undetected probes.
-meth = ewastools::mask(meth,0.01)
-
-#' ## Dye-bias correction
-#' 
-#' Infinium BeadChips use two fluorescent dyes that are linked to the nucleotides used in the the single-base extension step. A and T nucleotides use are linked with a red dye (the red color channel), G and C nucleotides are linked with a green dye (green color channel). Uncorrected data usually feature higher intensities in the red color channel, the so-called dye bias. For probes of Infinium type II design, which use separate color channels to measure the methylated and unmethylated signal, this results in a shifted distribution of beta-values. (Probes of Infinium design type I are not affected, as they measure both signals in the same color channel.) Dye-bias correction normalizes the red and green color channel. `ewastools` provides an improved version of RELIC ([Xu et al., 2017](https://doi.org/10.1186/s12864-016-3426-3)) using robust Theil-Sen estimators.
+# QUESTION: Excluding the Y chromosome and missing probes, what is the percentage
+# of undetected (0.01 cut-off) probes in the first sample.
 
 
-color_bias = meth %>% dont_normalize
-beta       = meth %>% correct_dye_bias %>% dont_normalize
 
-#' We can look at a few methylation values on the fly and see whether dye-bias correction changed them
-meth$manifest$channel[201:203] # One probe for each type/color channel
-color_bias[201:203,1:3] %>% round(4)
-beta      [201:203,1:3] %>% round(4)
+# ------------------------
+# Dye-bias correction
+# Infinium BeadChips use two fluorescent dyes that are linked to the nucleotides
+# used in the the single-base extension step. A and T nucleotides use are linked
+# with a red dye (the red color channel), G and C nucleotides are linked with a
+# green dye (green color channel). Uncorrected data usually feature higher
+# intensities in the red color channel, the so-called dye bias. For probes of
+# Infinium type II design, which use separate color channels to measure the
+# methylated and unmethylated signal, this results in a shifted distribution of
+# beta-values. (Probes of Infinium design type I are not affected, as they measure
+# both signals in the same color channel.)
 
-#' If we calculate beta-values from raw data, we can observe the dye bias as a deviation of the beta-values for heterozygous SNPs from 0.5
+# `correct_dye_bias()` adjusts the green color channel using the red color channel
+# as reference.
+
+meth %>% dont_normalize                      -> with_bias
+meth %>% correct_dye_bias %>% dont_normalize -> corrected
+
+# Looking at the same loci as before we can check whether dye-bias correction
+# changed the beta-values
+# Each probe is of a different type/color channel
+meth$manifest$channel[201:203]
+
+with_bias[201:203,1:3] %>% round(4)
+corrected[201:203,1:3] %>% round(4)
+
+# QUESTION: Why are the beta-values for cg06091566 unchanged?
+
+
+# Plotting beta-values for heterozygous SNPs, we can observe the dye bias as a
+# deviation from 0.5. For the corrected data, the middle peak aligns with 0.5
 snps = meth$manifest[probe_type=="rs" & channel=="Both"]$index
 
-plot (density(color_bias[snps,14],na.rm=TRUE,bw=0.1),col=1,main="Dye-bias correction")
-lines(density(beta      [snps,14],na.rm=TRUE,bw=0.1),col=2)
+plot (density(with_bias[snps,14],na.rm=TRUE,bw=0.1),col=1)
+lines(density(corrected[snps,14],na.rm=TRUE,bw=0.1),col=2)
 abline(v=0.5,lty=3)
-legend("topleft",col=1:2,legend=c("raw","corrected"),lwd=1)
+legend("topleft",col=1:2,legend=c("with_bias","corrected"),lwd=1)
 
-#' 
-plot (density(beta[meth$manifest$channel=="Grn" ,1],na.rm=TRUE),col="green",main="Distribution of beta-values")
-lines(density(beta[meth$manifest$channel=="Red" ,1],na.rm=TRUE),col="red")
-lines(density(beta[meth$manifest$channel=="Both",1],na.rm=TRUE),col="black")
-legend("topright",legend=c("Type I Red","Type I Grn","Type II"),lwd=1,col=c("red","green","black"))
 
-#' ## SNP outliers
-#' `snp_outliers()` returns the average log odds of belonging to the outlier component across all SNP probes. I recommend to flag samples with a score greater than -4 for exclusion.
+
+meth %>% correct_dye_bias -> meth
+rm(corrected,with_bias)
+
+
+
+# ------------------------
+# Sex check
+# `check_sex()` computes the normalized average total fluorescence intensity of
+# probes targeting the X and Y chromosomes, and `predict_sex()` infers the sex of
+# the sample donors based on this information. This check should be applied after
+# dye-bias correction but before undetected probes are masked.
+pheno[,c("X","Y"):=check_sex(meth)]
+pheno[,predicted_sex := predict_sex(X,Y,which(sex=="m"),which(sex=="f"))]
+
+# Are there instances where the sex inferred from the methylation data does not
+# match the information in the recorded meta data?
+pheno[sex!=predicted_sex,.(gsm,sex,predicted_sex)]
+
+# This is indeed the case for the sample with the ID GSM2260573. This most
+# likely means that this sample was mislabeled.
+
+# We flag this sample for exclusion
+pheno[sex!=predicted_sex,exclude:=TRUE]
+
+# Let's also plot these data
+plot(Y~X,data=pheno,type="n")
+text(Y~X,labels=sex,col=ifelse(sex=="m",2,1),data=pheno)
+# The mislabeled sample can be easily spotted as it falls into the wrong cluster.
+
+# QUESTION: What is the sample ID of the one outlier in above plot.
+
+
+
+# ------------------------
+# Before the next QC steps, we should mask undetected probes. Here we use a
+# cut-off of 0.01
+meth = mask(meth,0.01)
+
+# Now we can compute a "clean" matrix of beta-values. Undetected probes are
+# set to NA
+beta = dont_normalize(meth) 
+
+
+
+# ------------------------
+# SNP outliers
+# `snp_outliers()` returns the average log odds of belonging to the outlier
+# component across all SNP probes. Here a cut-off of -4 is used
+# greater than -4 for exclusion.
 snps = meth$manifest[probe_type=="rs"]$index
 genotypes = call_genotypes(beta[snps,],learn=FALSE)
 pheno$outlier = snp_outliers(genotypes)
@@ -163,10 +237,15 @@ pheno$outlier = snp_outliers(genotypes)
 stripchart(pheno$outlier,method="jitter",pch=4)
 abline(v=-4,lty="dotted",col=2)
 
-pheno[outlier>-4]
+# QUESTION: What is the ID of the sample failing this check? Compare the answer
+# to the answer of question _.
+
+
+# Mark the failing sample for exclusion
 pheno[outlier>-4,exclude:=TRUE]
 
-#' The one sample failing this check is the same sample that did not belong to either the male or female cluster in the plot above. This is strong evidence that this sample is indeed contaminated. While SNP outliers can also result from poorly performing assays, the sample passed the first quality check looking at the control metrics, therefore rendering this possibility unlikely. Another cause for a high outlier score is sample degradation (e.g., FFPE samples).
+
+
 
 pheno$donor_id = enumerate_sample_donors(genotypes)
 pheno[,n:=.N,by=donor_id]
