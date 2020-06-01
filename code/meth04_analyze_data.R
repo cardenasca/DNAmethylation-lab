@@ -92,7 +92,7 @@ lm(CpG.mlevel ~ smoker,data=pheno) %>% summary %$% adj.r.squared
 #'see [Barfield et al. Bioinformatics 2012](http://www.ncbi.nlm.nih.gov/pubmed/22451269)  
 
 #' Smoking as predictor  
-#' note that CpGassoc is quite fast for running almost a million regressions!
+#' note that CpGassoc is quite fast for running almost half million regressions!
 
 pheno[,smoke_dummy:=ifelse(smoker=="smoker",1,0)]
 
@@ -138,6 +138,7 @@ results3 <- cpg.assoc(
           )
 
 print(results3)
+
 
 #' ## Genomic inflation in EWAS
 #' qqplot and lambda interpretation  
