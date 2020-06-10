@@ -20,7 +20,7 @@ library(ewastools)
 
 beta =
 	paste0("data/",pheno$gsm) %>% # idat file paths
-	read_idats(quiet=TRUE) %>%    # import fluorescence intensities
+	read_idats %>%                # import fluorescence intensities
 	detectionP %>%                # compute detection p-values
 	mask(0.01) %>%                # set undetected probes to missing
 	correct_dye_bias %>%
@@ -28,9 +28,9 @@ beta =
 
 dim(beta)
 
-# There are some collisions between `minfi` and `ewastools`, i.e., function 
-# definitions with the same name. We therefore detach `ewastools`, i.e., th
-e# inverse of `library()`, before we proceed.
+# There are some name collisions between `minfi` and `ewastools`, i.e., function 
+# definitions with the same name. We therefore detach `ewastools`, i.e., the
+# inverse of `library()`, before we proceed.
 detach("package:ewastools")
 
 # In order to still be able to call functions from a package that is not loaded
@@ -42,8 +42,11 @@ detach("package:ewastools")
 options(warn=-1)
 suppressMessages(library(minfi))
 suppressMessages(library(ENmix))
+suppressMessages(library(IlluminaHumanMethylation450kmanifest))
+suppressMessages(library(IlluminaHumanMethylationEPICmanifest))
+suppressMessages(library(IlluminaHumanMethylation450kanno.ilmn12.hg19))
+suppressMessages(library(FlowSorted.Blood.450k))
 options(warn=0)
-
 idat_files = paste0("data/",pheno$gsm)
 
 # importing idat files, result is a RGChannelSet
