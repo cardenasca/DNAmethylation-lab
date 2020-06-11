@@ -18,7 +18,7 @@ update.packages(lib.loc="C:/EBC5/Rpackages")
 #' vector of packages we will need if not yet installed:
 
 methpackagesCRAN <- c("Rcpp","openssl","CpGassoc", "rmarkdown", "knitr", "matrixStats","reshape","glmnet","statmod","XML","BiocManager",
-                      "pryr", "data.table", "qqman", "RPMM", "MASS", "sandwich", "lmtest","foreach", "stringi","doParallel","magrittr","purrr")
+                      "pryr", "data.table", "qqman", "RPMM", "MASS", "sandwich", "lmtest","foreach", "stringi","doParallel","magrittr","purrr","svd")
 methpackagesBioC <- c("minfi", "FlowSorted.Blood.450k", "missMethyl", "ENmix","IlluminaHumanMethylation450kanno.ilmn12.hg19",
                       "IlluminaHumanMethylation450kmanifest", "IlluminaHumanMethylationEPICmanifest",
                       "sva", "IlluminaHumanMethylationEPICanno.ilm10b2.hg19","illuminaio", 
@@ -36,7 +36,7 @@ if(length(toinstallBioC >= 1)) {
   cat("finished installing new packages from BioConductor\n")
 } else cat("packages we need from BioConductor are already installed\n")
 
-devtools::install_github("hhhh5/ewastools",type = "source")
+devtools::install_github("hhhh5/ewastools@v1.6")
 devtools::install_github("sailalithabollepalli/EpiSmokEr",type = "source") # not on CRAN
 
 #' check that we were successful
