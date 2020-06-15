@@ -137,7 +137,7 @@ split(detP,pheno$sex) %>% sapply(median)
 # among females 60 probes are detected on average.
 
 # QUESTION: Excluding the Y chromosome and missing probes, what is the percentage
-# of undetected (0.01 cut-off) probes in the first sample.
+# of undetected (0.01 cut-off) probes in the first sample. (Use the `table`) function.
 
 
 
