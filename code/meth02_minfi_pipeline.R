@@ -83,9 +83,16 @@ plotBetasByType(    rcp(enmix)[,1],probeTypes=getAnnotation(enmix))
 # Cell type prediction
 # `minfi` can estimate the cell proportions of three different tissues: "Blood",
 # "CordBlood", or "DLPFC" (frontal cortex). Estimates for "Blood" are based on
-# the Reinius reference dataset 
+# the Reinius reference dataset. You have to use an `rgset` to estimate cell
+# proportions with `minfi` as the user-provided dataset is normalized together
+# with the reference dataset of purified cell types.
  
 minfi.LC = estimateCellCounts(rgset,compositeCellType="Blood")
+
+# QUESTION: What normalization is used by default?
+
+# QUESTION: Proportions for which cell types can be estimated
+# when `compositeCellType=="CordBlood"`?
 
 # Comparison with `ewastools` shows that the estimates or not indentical but
 # highly correlated
