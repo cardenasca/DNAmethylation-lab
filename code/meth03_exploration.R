@@ -73,3 +73,4 @@ boxplot(DNAmAge ~pheno$smoker, col=c("blue","red"))
 wilcox.test(DNAmAge ~ pheno$smoker)
 boxplot(DNAmAge.Hannum ~pheno$smoker, col=c("blue","red"))
 wilcox.test(DNAmAge.Hannum ~ pheno$smoker)
+

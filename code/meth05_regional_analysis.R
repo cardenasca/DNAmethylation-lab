@@ -86,21 +86,7 @@ DMR.plot(ranges=results.ranges, dmr=1, CpGs=betas.clean, phen.col=cols, what = "
          genome="hg19", samps=1:nrow(pheno))
 
 #' cleanup
-rm(tx.hg19,tx.hg38,tx.mm10,snpsall,myBetas,myannotation,crosshyb,XY.probes);gc()
-
-
-#'Extracting CpGs-names and locations
-coord = dmrcoutput.smoking$results$coord[1]
-coord = stri_match(coord,regex="^(chr.+):(\\d+)-(\\d+)$")
-
-chr = coord[2]
-start = as.integer(coord[3])
-end = as.integer(coord[4])
-
-#'CpG ID and individual metrics
-
-cpgs = subset(dmrcoutput.smoking$input, CHR == chr & pos >= start & pos <= end)
-knitr::kable(cpgs)
+gc()
 
 
 #'# Predicting smoking with EpiSmokEr: https://www.biorxiv.org/content/10.1101/487975v1.article-info
