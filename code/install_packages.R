@@ -56,5 +56,3 @@ if(!as.numeric(sub("\\.[0-9]$", "", installed.packages()["minfi","Version"])) >=
 rm(methpackagesCRAN, methpackagesBioC, toinstallCRAN, toinstallBioC)
 #' End of script
 #' 
-#' 
-#' 
