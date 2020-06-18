@@ -86,7 +86,8 @@ DMR.plot(ranges=results.ranges, dmr=1, CpGs=betas.clean, phen.col=cols, what = "
          genome="hg19", samps=1:nrow(pheno))
 
 
-#'# Predicting smoking with EpiSmokEr: https://pubmed.ncbi.nlm.nih.gov/31466478/
+#'# Predicting smoking with EpiSmokEr
+#' see [Bollepalli, Sailalitha, et al. Epigenomics 2019](https://pubmed.ncbi.nlm.nih.gov/31466478/).  
 suppressMessages(require(EpiSmokEr))
 # Make sure rows of pheno match betas column names
 rownames(pheno)<-pheno$gsm
