@@ -21,6 +21,7 @@ library(ewastools)
 ## Importing the data
 # Metadata stored in `data/pheno.csv` is imported using `fread` from the
 # data.table package and stored in the object `pheno`
+setwd("C:/EBC5/DNAmethylation-lab")
 pheno = fread("data/pheno.csv")
 
 # Take a look at the metadata

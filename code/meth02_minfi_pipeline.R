@@ -12,6 +12,7 @@ library(magrittr)
 options(warn=0)
 
 # List of idat files
+setwd("C:/EBC5/DNAmethylation-lab")
 pheno = fread("data/pheno_clean.csv")
 
 # Reminder: this is the `ewastools` pipeline (without QC)
@@ -47,7 +48,7 @@ suppressMessages(library(IlluminaHumanMethylationEPICmanifest))
 suppressMessages(library(IlluminaHumanMethylation450kanno.ilmn12.hg19))
 suppressMessages(library(FlowSorted.Blood.450k))
 options(warn=0)
-idat_files = paste0("data/",pheno$gsm)
+idat_files = paste0("C:/EBC5/DNAmethylation-lab/data/",pheno$gsm)
 
 # importing idat files, result is a RGChannelSet
 rgset = read.metharray(basenames=idat_files)
