@@ -1,5 +1,14 @@
+#' ---
+#' title: "Processing, analyzing, and interpreting epigenome-wide DNA methylation data"
+#' author: "Andrea Baccarelli, Andres Cardena, Elena Colicino, Jonathan Heiss, Allan Just"
+#' date: "June, 2020"
+#' geometry: margin=2cm
+#' number_sections: true
+#' ---
 # point R to the path of the installed packages
 .libPaths("C:/EBC5/Rpackages")
+#+ setdir01, echo = F
+knitr::opts_knit$set(root.dir = "../")
 
 # load required libraries (ignore warning messages)
 library(stringi)
