@@ -44,3 +44,5 @@ data/GSM*
 
 
 data/processed\.rda
+
+*.idat.gz
