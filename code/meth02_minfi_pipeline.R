@@ -78,6 +78,8 @@ plotBetasByType(getBeta(enmix)[,1],probeTypes=getAnnotation(enmix))
 # `rcp()` (regression on correlated probes) uses Type I probes to shift the
 # distribution of beta-values of Type II probes. Compared to above plot, the peaks
 # should be aligned now.
+
+## !! Next line does not work on AppStream. Ignore the error message and move on.
 plotBetasByType(    rcp(enmix)[,1],probeTypes=getAnnotation(enmix))
 
 
