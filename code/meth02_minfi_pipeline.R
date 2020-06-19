@@ -70,18 +70,16 @@ methylset
 #       number of CpG sites in probe sequence
 # * `preprocessENmix`: background correction (`ENmix` package)
 
-enmix = preprocessENmix(rgset[,1:2])
+processed = preprocessIllumina(rgset[,1:2])
 
 # Due to their design, Type II probes feature more background noise, shifting the
 # peaks for completely (un)methylated Cpg sites inwards
-plotBetasByType(getBeta(enmix)[,1],probeTypes=getAnnotation(enmix))
+plotBetasByType(getBeta(processed)[,1],probeTypes=getAnnotation(processed))
 
 # `rcp()` (regression on correlated probes) uses Type I probes to shift the
 # distribution of beta-values of Type II probes. Compared to above plot, the peaks
 # should be aligned now.
-
-## !! Next line does not work on AppStream. Ignore the error message and move on.
-plotBetasByType(    rcp(enmix)[,1],probeTypes=getAnnotation(enmix))
+plotBetasByType(    rcp(processed)[,1],probeTypes=getAnnotation(processed))
 
 
 # Cell type prediction
