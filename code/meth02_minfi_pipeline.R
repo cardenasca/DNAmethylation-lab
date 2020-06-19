@@ -3,7 +3,8 @@
 # as in the first script but using `minfi`, and point out some differences to
 # `ewastools`.
 
-# point R to the path of the installed packages
+# Point R to the path of the installed packages
+# (This is not required when you run R locally.)
 .libPaths("C:/EBC5/Rpackages")
 
 options(warn=-1)
