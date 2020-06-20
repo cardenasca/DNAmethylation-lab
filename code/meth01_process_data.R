@@ -355,5 +355,7 @@ pheno = pheno[,.(gsm,smoker,sex,CD4,CD8,NK,MO,GR,B)]
 # Also keep a copy of the manfist
 manifest = copy(meth$manifest)
 
-# Write data to disk (do not acutally run the next line)
+# Write data to disk. (Do not acutally run the next line. Only when
+# running the script locally, you should un-comment the next line
+# in order to save the results to be re-used in the following scripts).
 # save(pheno,manifest,beta,file="data/processed.rda")
