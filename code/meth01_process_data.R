@@ -53,7 +53,7 @@ meth$manifest[4001:4010]
 
 
 # QUESTION: Why is the column `addressM` missing for entries with
-# `probe_type=="Both"`?
+# `channel=="Both"`?
 
 # Some columns (`index`,`OOBi`,`Ui`,`Mi`) are used for the internal workings of
 # the `ewastools` package and not of interest for the user
